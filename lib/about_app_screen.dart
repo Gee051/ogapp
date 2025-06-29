@@ -50,12 +50,12 @@ class AboutAppScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           const Text(
-            "OG is an all-in-one academic and student life manager tailored to make campus life easier and more productive. Your personal school OG!!",
+            "OG app is an all-in-one academic and student life manager tailored to make campus life easier and more productive. Your personal school OG!!",
             style: TextStyle(
               fontSize: 16,
               height: 1.6,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
+              color: Colors.black87, 
             ),
           ),
           const SizedBox(height: 20),
@@ -86,9 +86,9 @@ class AboutAppScreen extends StatelessWidget {
                   "Built with ❤️ for every OG.",
                   style: TextStyle(
                     fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     fontSize: 17,
-                    color: Color(0xFF5EBCE2),
+                    color: Color(0xFF307DBA),
                   ),
                 ),
               ],

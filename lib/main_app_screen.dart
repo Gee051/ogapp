@@ -33,7 +33,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
         },
       ),
       const EventsScreen(),
-      const SchoolScreen(),
+      SchoolScreen(),
       MeScreen(
       userFirstName: widget.userFirstName,
       userRole: widget.userRole,

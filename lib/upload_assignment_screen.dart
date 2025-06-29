@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UploadAssignmentScreen extends StatefulWidget {
   final Map<String, dynamic>? existingData;
@@ -51,18 +52,29 @@ class _UploadAssignmentScreenState extends State<UploadAssignmentScreen> {
     }
   }
 
-  Future<void> pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['doc', 'docx'],
-    );
 
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        pickedFile = File(result.files.single.path!);
-      });
-    }
+
+Future<void> pickFile() async {
+  final status = await Permission.storage.request();
+  if (!status.isGranted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Storage permission is required")),
+    );
+    return;
   }
+
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['doc', 'docx'],
+  );
+
+  if (result != null && result.files.single.path != null) {
+    setState(() {
+      pickedFile = File(result.files.single.path!);
+    });
+  }
+}
+
 
   Future<void> submitAssignment() async {
     if (!_formKey.currentState!.validate() || dueDate == null || selectedDepartments.isEmpty || selectedLevels.isEmpty) {

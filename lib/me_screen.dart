@@ -88,7 +88,7 @@ class MeScreen extends StatelessWidget {
         'icon': isLecturer ? Icons.upload_file : Icons.bookmark,
         'label': isLecturer ? 'Student Submissions' : 'Saved Notes',
         'builder': (context) =>
-            isLecturer ? const StudentSubmissionsScreen() : const SavedNotesScreen(),
+            isLecturer ? const StudentSubmissionsScreen() : SavedNotesScreen(),
       },
       {
         'icon': Icons.feedback,

@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'event_details_screen.dart';
-
+import 'add_event_screen.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -14,12 +15,25 @@ class _EventsScreenState extends State<EventsScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> allEvents = [];
   List<Map<String, dynamic>> filteredEvents = [];
+  bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     fetchEvents();
+    fetchUserRole();
     _searchController.addListener(_filterEvents);
+  }
+
+  Future<void> fetchUserRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final data = doc.data();
+      if (data != null && data['isAdmin'] == true) {
+        setState(() => isAdmin = true);
+      }
+    }
   }
 
   Future<void> fetchEvents() async {
@@ -49,8 +63,10 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFF),
+      backgroundColor: isDarkMode ? Colors.black : const Color(0xFFF8FAFF),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Container(
@@ -74,6 +90,19 @@ class _EventsScreenState extends State<EventsScreen> {
                 color: Colors.white,
               ),
             ),
+            actions: [
+              if (isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AddEventScreen()),
+                    );
+                    if (result == 'added') fetchEvents();
+                  },
+                ),
+            ],
           ),
         ),
       ),
@@ -87,7 +116,7 @@ class _EventsScreenState extends State<EventsScreen> {
                 hintText: 'Search events...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -134,19 +163,21 @@ class _EventsScreenState extends State<EventsScreen> {
                               children: [
                                 Text(
                                   event['name'] ?? '',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w900,
                                     fontFamily: 'Kanit',
                                     fontStyle: FontStyle.italic,
-                                    color: Colors.black87,
+                                    color: isDarkMode ? Colors.white : Colors.black87,
+
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   event['date'] ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    color: isDarkMode ? Colors.grey[400] : Colors.grey,
+
                                     fontWeight: FontWeight.w600,
                                     fontSize: 17,
                                   ),

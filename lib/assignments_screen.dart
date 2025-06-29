@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'upload_assignment_screen.dart';
 import 'assignment_detail_screen.dart';
 
@@ -71,7 +70,10 @@ class AssignmentScreen extends StatelessWidget {
             } else {
               final departments = List<String>.from(data['departments'] ?? []);
               final levels = List<String>.from(data['levels'] ?? []);
-              return departments.contains(userDepartment) && levels.contains(userLevel);
+              final normalizedUserLevel =
+                  userLevel.replaceAll(RegExp(r'[^\d]'), ''); // e.g. "200L" → "200"
+              return departments.contains(userDepartment) &&
+                  levels.contains(normalizedUserLevel);
             }
           }).toList();
 
@@ -90,6 +92,9 @@ class AssignmentScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final doc = filteredDocs[index];
               final data = doc.data() as Map<String, dynamic>;
+
+              // ✅ Inject Firestore doc ID into the data map
+              data['id'] = doc.id;
 
               final title = data['title'] ?? '';
               final course = data['course'] ?? '';
@@ -117,7 +122,10 @@ class AssignmentScreen extends StatelessWidget {
                       Text(
                         'Course: $course',
                         style: const TextStyle(
-                            fontFamily: 'Kanit', fontSize: 17, fontWeight: FontWeight.w700),
+                          fontFamily: 'Kanit',
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       Text(
                         'Due: ${deadline.toLocal().toString().split(' ')[0]}',
@@ -130,7 +138,8 @@ class AssignmentScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Color(0xFF307DBA)),
+                              icon: const Icon(Icons.edit,
+                                  color: Color(0xFF307DBA)),
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -145,7 +154,8 @@ class AssignmentScreen extends StatelessWidget {
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _confirmDelete(context, doc.id, title),
+                              onPressed: () => _confirmDelete(
+                                  context, doc.id, data['title'] ?? 'Assignment'),
                             ),
                           ],
                         )
@@ -181,7 +191,8 @@ class AssignmentScreen extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, String assignmentId, String assignmentTitle) {
+  void _confirmDelete(
+      BuildContext context, String assignmentId, String assignmentTitle) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -195,7 +206,10 @@ class AssignmentScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await FirebaseFirestore.instance.collection('assignments').doc(assignmentId).delete();
+              await FirebaseFirestore.instance
+                  .collection('assignments')
+                  .doc(assignmentId)
+                  .delete();
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Assignment deleted successfully')),
